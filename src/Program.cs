@@ -11,19 +11,18 @@ namespace Encryption
         {
             Core.Init();
             
-            Stream stream;
+            Window w;
             
             if (args.Length > 0)
             {
-                stream = new FileStream(args[0], FileMode.Open);
+                w = new Program(800, 500, "WORK", new FileStream(args[0], FileMode.Open));
             }
             else
             {
-                stream = new FileStream("passwords.aes", FileMode.Create);
+                w = new Program(800, 500, "WORK");
             }
             
-            Window w = new Program(800, 500, "WORK", stream);
-            w.Run();
+            w.RunMultithread();
             
             Core.Terminate();
         }
@@ -36,9 +35,50 @@ namespace Encryption
             //AddChild();
             
             _file = file;
+            _fileOpen = true;
+            
+            _lm = new LayoutManager(RootElement, new Xml());
+            LoadLayout(LayoutSelect.Input);
         }
         
+        public Program(int width, int height, string title)
+            : base(width, height, title)
+        {
+            //RootElement.LayoutManager = new BlockLayout(10d);
+            
+            //AddChild();
+            
+            _file = new FileStream("passwords.aes", FileMode.Create);
+            _fileOpen = false;
+            
+            _lm = new LayoutManager(RootElement, new Xml());
+            LoadLayout(LayoutSelect.Input);
+        }
+        
+        private readonly bool _fileOpen;
         private Stream _file;
         private PasswordManager _pm;
+        private string _password;
+        
+        private LayoutManager _lm;
+        
+        private void LoadLayout(LayoutSelect layout) => _lm.SelectLayout(layout);
+        
+        private void OnPasswordEntered(object sender, EventArgs e)
+        {
+            PasswordEnter pe = sender as PasswordEnter;
+            _password = pe.GetPassword();
+            
+            if (_fileOpen)
+            {
+                _pm = Encryption.Decrypt(_file, _password);
+            }
+            else
+            {
+                _pm = new PasswordManager();
+            }
+            
+            LoadLayout(LayoutSelect.View);
+        }
     }
 }

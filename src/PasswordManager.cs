@@ -13,11 +13,8 @@ namespace Encryption
         {
             
         }
-        
         public PasswordManager(Stream stream)
         {
-            _passwords = new Dictionary<string, string>();
-            
             JsonElement root;
             
             try
@@ -42,7 +39,11 @@ namespace Encryption
             }
         }
         
-        private Dictionary<string, string> _passwords;
+        public PasswordManager()
+        {
+        }
+        
+        private readonly Dictionary<string, string> _passwords = new Dictionary<string, string>();
         
         public string GetPassword(string value) => _passwords[value];
         public void AddPassword(string name, string password) => _passwords.Add(name, password);
