@@ -14,24 +14,22 @@ namespace Encryption
     
     public class LayoutManager
     {
-        private class ElementManager : IElementManager
+        private class ElementManager : ElementList
         {
-            public ElementManager(IElementManager real)
+            public ElementManager(IElement source)
+                : base(source)
             {
-                _handle = real;
+                
             }
             
-            private readonly List<Element> _elements = new List<Element>();
-            public Element this[int index] => _elements[index];
+            private readonly List<IElement> _elements = new List<IElement>();
+            public new IElement this[int index] => _elements[index];
             
-            public int Length => _elements.Count;
+            public new int Length => _elements.Count;
             
-            private readonly IElementManager _handle;
-            public Window Handle => _handle.Handle;
-            
-            public void AddChild(Element e) => _elements.Add(e);
-            public void ClearChildren() => _elements.Clear();
-            public bool RemoveChild(Element e) => _elements.Remove(e);
+            public override void Add(IElement e) => _elements.Add(e);
+            public override void Clear() => _elements.Clear();
+            public override void RemoveAt(int index) => _elements.RemoveAt(index);
         }
         
         public LayoutManager(RootElement rootElement, Xml xml)
