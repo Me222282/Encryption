@@ -22,7 +22,7 @@ namespace Encryption
             using CryptoStream csEncrypt = new CryptoStream(output, encryptor, CryptoStreamMode.Write);
             
             // Write json file
-            pm.GetJson(csEncrypt);
+            pm.WriteToStream(csEncrypt);
         }
         
         public static PasswordManager Decrypt(Stream input, string password)

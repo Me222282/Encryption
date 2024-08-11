@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -6,7 +7,13 @@ using System.Text.Json;
 
 namespace Encryption
 {
-    public class PasswordManager
+    public class EntryContainer
+    {
+        public string Name { get; set; }
+        public List<KeyValuePair<string, string>> Entries { get; } = new List<KeyValuePair<string, string>>();
+    }
+    
+    public class PasswordManager : IEnumerable<EntryContainer>
     {
         public PasswordManager(string json)
             : this(new MemoryStream(Encoding.UTF8.GetBytes(json)))
@@ -27,37 +34,57 @@ namespace Encryption
             
             foreach (JsonProperty jp in root.EnumerateObject())
             {
-                string name = jp.Name;
+                EntryContainer ec = new EntryContainer();
+                
+                ec.Name = jp.Name;
                 JsonElement je = jp.Value;
                 
-                if (je.ValueKind != JsonValueKind.String)
+                foreach (JsonProperty jpEntry in je.EnumerateObject())
                 {
-                    throw new Exception("Invalid JSON.");
+                    if (jpEntry.Value.ValueKind != JsonValueKind.String)
+                    {
+                        throw new Exception("Invalid JSON.");
+                    }
+                    
+                    ec.Entries.Add(new KeyValuePair<string, string>(jpEntry.Name, jpEntry.Value.GetString()));
                 }
                 
-                _passwords.Add(name, je.GetString());
+                _groups.Add(ec);
             }
         }
         
-        public PasswordManager()
+        public PasswordManager() { }
+        
+        public int GroupCount => _groups.Count;
+        public EntryContainer this[int index] => _groups[index];
+        
+        private List<EntryContainer> _groups = new List<EntryContainer>();
+        public EntryContainer AddGroup(string name)
         {
+            EntryContainer ec = new EntryContainer()
+            {
+                Name = name
+            };
+            _groups.Add(ec);
+            return ec;
         }
+        public void RemoveGroup(string name) => _groups.RemoveAll(ec => ec.Name == name);
         
-        private readonly Dictionary<string, string> _passwords = new Dictionary<string, string>();
+        public IEnumerator<EntryContainer> GetEnumerator() => _groups.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _groups.GetEnumerator();
         
-        public string GetPassword(string value) => _passwords[value];
-        public void AddPassword(string name, string password) => _passwords.Add(name, password);
-        public bool RemovePassword(string name) => _passwords.Remove(name);
-        
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _passwords.GetEnumerator();
-        
-        public void GetJson(Stream stream)
+        public void WriteToStream(Stream stream)
         {
             Utf8JsonWriter jw = new Utf8JsonWriter(stream);
             
-            foreach (KeyValuePair<string, string> keyPair in _passwords)
+            foreach (EntryContainer ec in _groups)
             {
-                jw.WriteString(keyPair.Key, keyPair.Value);
+                jw.WriteStartObject(ec.Name);
+                foreach (KeyValuePair<string, string> keyPair in ec.Entries)
+                {
+                    jw.WriteString(keyPair.Key, keyPair.Value);
+                }
+                jw.WriteEndObject();
             }
         }
     }
