@@ -43,6 +43,7 @@ namespace Encryption
             _viewLayout = new ElementManager(_root);
             
             _xml.LoadGUI(_inputLayout, File.ReadAllText("Layouts/passwordInput.xml"));
+            _xml.LoadGUI(_viewLayout, File.ReadAllText("Layouts/passwordManage.xml"));
         }
         
         private Xml _xml;
