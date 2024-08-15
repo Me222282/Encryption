@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Zene.GUI;
+using Zene.Structs;
 using Zene.Windowing;
 
 namespace Encryption
@@ -78,7 +79,67 @@ namespace Encryption
                 _pm = new PasswordManager();
             }
             
-            LoadLayout(LayoutSelect.View);
+            Actions.Push(() =>
+            {
+                LoadPMElements(_lm.ViewContainer);
+                LoadLayout(LayoutSelect.View);
+            });
+        }
+        
+        private Button _addGroup;
+        private ScaleLayout _scaleLayout = new ScaleLayout(5d);
+        private Layout _countainerL = new Layout(0d, 0d, 1.9d, 0d);
+        private void LoadPMElements(IElement container)
+        {
+            foreach (EntryContainer ec in _pm)
+            {
+                AddContainer(container, ec);
+            }
+            
+            _addGroup = new Button(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
+            {
+                TextSize = 30d,
+                Text = "Add Group",
+                BorderWidth = 0
+            };
+            _addGroup.Click += AddGroupEvent;
+            container.Children.Add(_addGroup);
+        }
+        private void AddContainer(IElement parent, EntryContainer ec)
+        {
+            Container c = new Container(_countainerL);
+            c.Graphics.Colour = ColourF.Grey;
+            c.LayoutManager = _scaleLayout;
+            c.AddChild(new Label(new TextLayout(5d, 5d)) { Text = ec.Name, TextSize = 20d, BorderWidth = 0 });
+            c.AddChild(new Button(new TextLayout(5d, 5d, 0d, 0d, 0.5, 0d)) { Text = "Add Entry", TextSize = 20d });
+            
+            parent.Children.Add(c);
+        }
+        
+        private void AddGroupEvent(object sender, EventArgs e)
+        {
+            TempTextBox ttb = new TempTextBox(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
+            {
+                TextSize = 30d,
+            };
+            ttb.Entered += PushGroup;
+            _lm.ViewContainer.Children.Remove(_addGroup);
+            _lm.ViewContainer.Children.Add(ttb);
+            RootElement.Focus = ttb;
+        }
+        private void PushGroup(object sender, EventArgs e)
+        {
+            TempTextBox ttb = sender as TempTextBox;
+            if (ttb == null) { return; }
+            
+            string name = ttb.Text;
+            _lm.ViewContainer.Children.Remove(ttb);
+            if (name == null) { return; }
+            name = name.Trim();
+            if (name.Length == 0) { return; }
+            
+            AddContainer(_lm.ViewContainer, _pm.AddGroup(name));
+            _lm.ViewContainer.Children.Add(_addGroup);
         }
     }
 }

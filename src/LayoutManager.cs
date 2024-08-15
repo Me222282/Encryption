@@ -50,6 +50,8 @@ namespace Encryption
         private ElementManager _inputLayout;
         private ElementManager _viewLayout;
         
+        public IElement ViewContainer => _viewLayout[0];
+        
         public void SelectLayout(LayoutSelect layout)
         {
             _root.ClearChildren();
@@ -60,6 +62,12 @@ namespace Encryption
                 LayoutSelect.View => _viewLayout,
                 _ => _viewLayout
             };
+            
+            // if (layout == LayoutSelect.View)
+            // {
+            //     _root.AddChild(new Button(new TextLayout(5d, 5d, 100d, -50d, false)) { Text = "Add", TextSize = 20d });
+            //     return;
+            // }
             
             for (int i = 0; i < select.Length; i++)
             {
