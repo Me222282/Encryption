@@ -54,6 +54,13 @@ namespace Encryption
             
             _lm = new LayoutManager(RootElement, new Xml());
             LoadLayout(LayoutSelect.Input);
+            
+            _ttb = new TempTextBox(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
+            {
+                TextSize = 30d,
+            };
+            _ttb.Entered += PushGroup;
+            _ttb.Canceled += CancelGroup;
         }
         
         private readonly bool _fileOpen;
@@ -87,13 +94,15 @@ namespace Encryption
         }
         
         private Button _addGroup;
+        private TempTextBox _ttb;
         private ScaleLayout _scaleLayout = new ScaleLayout(5d);
         private Layout _countainerL = new Layout(0d, 0d, 1.9d, 0d);
         private void LoadPMElements(IElement container)
         {
             foreach (EntryContainer ec in _pm)
             {
-                AddContainer(container, ec);
+                //AddContainer(container, ec);
+                container.Children.Add(new ECElement(_countainerL, _scaleLayout, ec));
             }
             
             _addGroup = new Button(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
@@ -116,30 +125,34 @@ namespace Encryption
             parent.Children.Add(c);
         }
         
+        private void CancelGroup(object sender, EventArgs e)
+        {
+            Actions.Push(() =>
+            {
+                _lm.ViewContainer.Children.Remove(_ttb);
+                _lm.ViewContainer.Children.Add(_addGroup);
+                RootElement.Focus = _addGroup;
+            });
+        }
         private void AddGroupEvent(object sender, EventArgs e)
         {
-            TempTextBox ttb = new TempTextBox(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
-            {
-                TextSize = 30d,
-            };
-            ttb.Entered += PushGroup;
+            _ttb.Text = "";
             _lm.ViewContainer.Children.Remove(_addGroup);
-            _lm.ViewContainer.Children.Add(ttb);
-            RootElement.Focus = ttb;
+            _lm.ViewContainer.Children.Add(_ttb);
+            RootElement.Focus = _ttb;
         }
         private void PushGroup(object sender, EventArgs e)
         {
-            TempTextBox ttb = sender as TempTextBox;
-            if (ttb == null) { return; }
-            
-            string name = ttb.Text;
-            _lm.ViewContainer.Children.Remove(ttb);
+            string name = _ttb.Text;
+            _lm.ViewContainer.Children.Remove(_ttb);
             if (name == null) { return; }
             name = name.Trim();
             if (name.Length == 0) { return; }
             
-            AddContainer(_lm.ViewContainer, _pm.AddGroup(name));
+            ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
+            _lm.ViewContainer.Children.Add(ece);
             _lm.ViewContainer.Children.Add(_addGroup);
+            RootElement.Focus = ece;
         }
     }
 }

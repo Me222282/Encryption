@@ -13,6 +13,7 @@ namespace Encryption
         }
         
         public event EventHandler Entered;
+        public event EventHandler Canceled;
 
         protected override void OnFocus(FocusedEventArgs e)
         {
@@ -20,7 +21,7 @@ namespace Encryption
             
             if (e.Focus) { return; }
             
-            Parent.Children.Remove(this);
+            Canceled?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -32,7 +33,7 @@ namespace Encryption
             }
             if (e[Keys.Escape])
             {
-                Parent.Children.Remove(this);
+                Canceled?.Invoke(this, EventArgs.Empty);
                 return;
             }
             
