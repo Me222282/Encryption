@@ -8,15 +8,25 @@ namespace Encryption
 {
     class Program : GUIWindow
     {
+        public static bool ReadOnly { get; private set; } = false;
+        
         static void Main(string[] args)
         {
             Core.Init();
             
+            int i = 0;
+            if (args.Length > 0 && args[i] == "-r")
+            {
+                i++;
+                ReadOnly = true;
+            }
+            
             Window w;
             
-            if (args.Length > 0)
+            if (args.Length > i)
             {
-                w = new Program(800, 500, "WORK", new FileStream(args[0], FileMode.Open));
+                FileAccess fa = ReadOnly ? FileAccess.Read : FileAccess.ReadWrite;
+                w = new Program(800, 500, "WORK", new FileStream(args[i], FileMode.Open, fa));
             }
             else
             {
@@ -31,10 +41,6 @@ namespace Encryption
         public Program(int width, int height, string title, Stream file)
             : base(width, height, title)
         {
-            //RootElement.LayoutManager = new BlockLayout(10d);
-            
-            //AddChild();
-            
             _file = file;
             _fileOpen = true;
             
@@ -45,18 +51,14 @@ namespace Encryption
         public Program(int width, int height, string title)
             : base(width, height, title)
         {
-            //RootElement.LayoutManager = new BlockLayout(10d);
-            
-            //AddChild();
-            
-            _file = new FileStream("passwords.aes", FileMode.Create);
+            //_file = new FileStream("passwords.aes", FileMode.Create);
             _fileOpen = false;
             
             _lm = new LayoutManager(RootElement, new Xml());
-            LoadLayout(LayoutSelect.Input);
+            //LoadLayout(LayoutSelect.Input);
         }
         
-        private readonly bool _fileOpen;
+        private bool _fileOpen;
         private Stream _file;
         private PasswordManager _pm;
         private string _password;
@@ -71,13 +73,29 @@ namespace Encryption
             
             if (e[Keys.S] && e[Mods.Control])
             {
-                if (_pm == null) { return; }
+                if (_pm == null || ReadOnly) { return; }
                 Encryption.Encrypt(_pm, _password, _file);
                 return;
             }
             if (e[Keys.A] && e[Mods.Control])
             {
+                if (ReadOnly) { return; }
                 AddGroupEvent(null, null);
+                return;
+            }
+            if (e[Keys.C] && e[Mods.Control] && e[Mods.Shift])
+            {
+                if (ReadOnly) { return; }
+                //if (RootElement.Elements.Length > 0) { return; }
+                if (_pm != null && !ReadOnly)
+                {
+                    Encryption.Encrypt(_pm, _password, _file);
+                    _pm = null;
+                }
+                LoadLayout(LayoutSelect.Input);
+                if (_file != null) { _file.Close(); }
+                _file = new FileStream("passwords.aes", FileMode.Create);
+                _fileOpen = false;
                 return;
             }
         }
@@ -85,6 +103,10 @@ namespace Encryption
         {
             base.OnStop(e);
             
+            if (_pm != null && !ReadOnly)
+            {
+                Encryption.Encrypt(_pm, _password, _file);
+            }
             _file.Close();
         }
         protected override void OnStart(EventArgs e)
@@ -98,20 +120,32 @@ namespace Encryption
             _ttb.Entered += PushGroup;
             _ttb.Canceled += CancelGroup;
         }
+        protected override void OnFileDrop(FileDropEventArgs e)
+        {
+            base.OnFileDrop(e);
+            
+            //if (RootElement.Elements.Length > 0) { return; }
+            if (_pm != null && !Program.ReadOnly)
+            {
+                Encryption.Encrypt(_pm, _password, _file);
+                _pm = null;
+            }
+            LoadLayout(LayoutSelect.Input);
+            if (_file != null) { _file.Close(); }
+            _file = new FileStream(e.Paths[0], FileMode.Open);
+            _fileOpen = true;
+        }
 
         private void OnPasswordEntered(object sender, EventArgs e)
         {
             PasswordEnter pe = sender as PasswordEnter;
             _password = pe.GetPassword();
+            pe.Clear();
             
             if (_fileOpen)
             {
                 _pm = Encryption.Decrypt(_file, _password);
-                if (_pm == null)
-                {
-                    pe.Clear();
-                    return;
-                }
+                if (_pm == null) { return; }
             }
             else
             {
@@ -131,11 +165,15 @@ namespace Encryption
         private Layout _countainerL = new Layout(0d, 0d, 1.9d, 0d);
         private void LoadPMElements(IElement container)
         {
+            container.Children.Clear();
+            
             foreach (EntryContainer ec in _pm)
             {
                 //AddContainer(container, ec);
                 container.Children.Add(new ECElement(_countainerL, _scaleLayout, ec));
             }
+            
+            if (Program.ReadOnly) { return; }
             
             _addGroup = new Button(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
             {
@@ -149,7 +187,7 @@ namespace Encryption
         private void AddContainer(IElement parent, EntryContainer ec)
         {
             Container c = new Container(_countainerL);
-            c.Graphics.Colour = ColourF.Grey;
+            c.Graphics.Colour = ColourF.DarkGrey;
             c.LayoutManager = _scaleLayout;
             c.AddChild(new Label(new TextLayout(5d, 5d)) { Text = ec.Name, TextSize = 20d, BorderWidth = 0 });
             c.AddChild(new Button(new TextLayout(5d, 5d, 0d, 0d, 0.5, 0d)) { Text = "Add Entry", TextSize = 20d });

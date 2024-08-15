@@ -17,6 +17,14 @@ namespace Encryption
             
             AddChild(new Label(_tl2) { Text = ec.Name, TextSize = 20d, BorderWidth = 0 });
             
+            Span<KeyValuePair<string, string>> span = CollectionsMarshal.AsSpan(ec.Entries);
+            for (int i = 0; i < span.Length; i++)
+            {
+                AddEntry(span[i].Key);
+            }
+            
+            if (Program.ReadOnly) { return; }
+            
             _addEG = new Container(_cl);
             _addEG.LayoutManager = _scaleLayout;
             Button ae = new Button(new TextLayout(5d, 5d, 0d, 0d, 0.5, 0d)) { Text = "Add Entry", TextSize = 20d };
@@ -25,12 +33,6 @@ namespace Encryption
             Button rm = new Button(new TextLayout(5d, 5d, 0d, 0d, 0.5, 0d)) { Text = "Delete Group", TextSize = 20d };
             rm.Click += DeleteGroup;
             _addEG.AddChild(rm);
-            
-            Span<KeyValuePair<string, string>> span = CollectionsMarshal.AsSpan(ec.Entries);
-            for (int i = 0; i < span.Length; i++)
-            {
-                AddEntry(span[i].Key);
-            }
             
             AddChild(_addEG);
             
