@@ -92,15 +92,18 @@ namespace Encryption
             cc.Click += CopyEvent;
             c.AddChild(cc);
             
-            Button cd = new Button(_tl2)
+            if (!Program.ReadOnly)
             {
-                Text = "Del",
-                TextSize = 15d,
-                BorderWidth = 0,
-                Id = name
-            };
-            cd.Click += DeleteEvent;
-            c.AddChild(cd);
+                Button cd = new Button(_tl2)
+                {
+                    Text = "Del",
+                    TextSize = 15d,
+                    BorderWidth = 0,
+                    Id = name
+                };
+                cd.Click += DeleteEvent;
+                c.AddChild(cd);
+            }
             
             AddChild(c);
         }
@@ -110,8 +113,11 @@ namespace Encryption
             Button ib = sender as Button;
             if (ib == null) { return; }
             
-            _ec.Entries.RemoveAll(t => ib.Id == t.Key);
-            RemoveChild(ib.Parent);
+            Actions.Push(() =>
+            {
+                _ec.Entries.RemoveAll(t => ib.Id == t.Key);
+                RemoveChild(ib.Parent);
+            });
         }
         private void CopyEvent(object sender, EventArgs e)
         {
@@ -122,18 +128,24 @@ namespace Encryption
         }
         private void AddEntryEvent(object sender, EventArgs e)
         {
-            _addLabel.Text = "";
-            _addValue.Text = "";
-            RemoveChild(_addEG);
-            AddChild(_addGroup);
-            Handle.Focus = _addLabel;
+            Actions.Push(() =>
+            {
+                _addLabel.Text = "";
+                _addValue.Text = "";
+                RemoveChild(_addEG);
+                AddChild(_addGroup);
+                Handle.Focus = _addLabel;
+            });
         }
         private void ConfirmEvent(object sender, EventArgs e)
         {
-            RemoveChild(_addGroup);
-            ManageConfirm();
-            AddChild(_addEG);
-            Handle.Focus = _addEG;
+            Actions.Push(() =>
+            {
+                RemoveChild(_addGroup);
+                ManageConfirm();
+                AddChild(_addEG);
+                Handle.Focus = _addEG;
+            });
         }
         private void ManageConfirm()
         {
@@ -148,13 +160,19 @@ namespace Encryption
         }
         private void CancelEvent(object sender, EventArgs e)
         {
-            RemoveChild(_addGroup);
-            AddChild(_addEG);
-            Handle.Focus = _addEG;
+            Actions.Push(() =>
+            {
+                RemoveChild(_addGroup);
+                AddChild(_addEG);
+                Handle.Focus = _addEG;
+            });
         }
         private void DeleteGroup(object sender, EventArgs e)
         {
-            Parent.Children.Remove(this);
+            Actions.Push(() =>
+            {
+                Parent.Children.Remove(this);
+            });
         }
     }
 }

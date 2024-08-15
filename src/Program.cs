@@ -107,6 +107,8 @@ namespace Encryption
             {
                 Encryption.Encrypt(_pm, _password, _file);
             }
+            
+            if (_file == null) { return; }
             _file.Close();
         }
         protected override void OnStart(EventArgs e)
@@ -206,23 +208,29 @@ namespace Encryption
         }
         private void AddGroupEvent(object sender, EventArgs e)
         {
-            _ttb.Text = "";
-            _lm.ViewContainer.Children.Remove(_addGroup);
-            _lm.ViewContainer.Children.Add(_ttb);
-            RootElement.Focus = _ttb;
+            Actions.Push(() =>
+            {
+                _ttb.Text = "";
+                _lm.ViewContainer.Children.Remove(_addGroup);
+                _lm.ViewContainer.Children.Add(_ttb);
+                RootElement.Focus = _ttb;
+            });
         }
         private void PushGroup(object sender, EventArgs e)
         {
-            string name = _ttb.Text;
-            _lm.ViewContainer.Children.Remove(_ttb);
-            if (name == null) { return; }
-            name = name.Trim();
-            if (name.Length == 0) { return; }
-            
-            ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
-            _lm.ViewContainer.Children.Add(ece);
-            _lm.ViewContainer.Children.Add(_addGroup);
-            RootElement.Focus = ece;
+            Actions.Push(() =>
+            {
+                string name = _ttb.Text;
+                _lm.ViewContainer.Children.Remove(_ttb);
+                if (name == null) { return; }
+                name = name.Trim();
+                if (name.Length == 0) { return; }
+                
+                ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
+                _lm.ViewContainer.Children.Add(ece);
+                _lm.ViewContainer.Children.Add(_addGroup);
+                RootElement.Focus = ece;
+            });
         }
     }
 }
