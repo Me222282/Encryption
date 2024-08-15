@@ -16,6 +16,12 @@ namespace Encryption
         
         public event EventHandler PasswordEntered;
         
+        public void Clear()
+        {
+            base.TextReference = "";
+            _passWordView = "";
+        }
+        
         protected override void OnTextInput(TextInputEventArgs e)
         {
             base.OnTextInput(e);

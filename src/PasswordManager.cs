@@ -22,15 +22,19 @@ namespace Encryption
         }
         public PasswordManager(Stream stream)
         {
-            JsonElement root;
+            JsonElement root = JsonDocument.Parse(stream).RootElement;
             
-            try
-            {
-                root = JsonDocument.Parse(stream).RootElement;
-            }
-            catch (JsonException) { return; }
+            // try
+            // {
+            //     root = JsonDocument.Parse(stream).RootElement;
+            // }
+            // catch (JsonException)
+            // {
+            //     Console.WriteLine("Failed to load json.");
+            //     return;
+            // }
             
-            int length = root.GetArrayLength();
+            //int length = root.GetArrayLength();
             
             foreach (JsonProperty jp in root.EnumerateObject())
             {
@@ -75,7 +79,9 @@ namespace Encryption
         
         public void WriteToStream(Stream stream)
         {
-            Utf8JsonWriter jw = new Utf8JsonWriter(stream);
+            Utf8JsonWriter jw = new Utf8JsonWriter(stream, new JsonWriterOptions() { Indented = true });
+            
+            jw.WriteStartObject();
             
             foreach (EntryContainer ec in _groups)
             {
@@ -86,6 +92,9 @@ namespace Encryption
                 }
                 jw.WriteEndObject();
             }
+            jw.WriteEndObject();
+            jw.Flush();
+            jw.Dispose();
         }
     }
 }

@@ -54,13 +54,6 @@ namespace Encryption
             
             _lm = new LayoutManager(RootElement, new Xml());
             LoadLayout(LayoutSelect.Input);
-            
-            _ttb = new TempTextBox(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
-            {
-                TextSize = 30d,
-            };
-            _ttb.Entered += PushGroup;
-            _ttb.Canceled += CancelGroup;
         }
         
         private readonly bool _fileOpen;
@@ -71,7 +64,41 @@ namespace Encryption
         private LayoutManager _lm;
         
         private void LoadLayout(LayoutSelect layout) => _lm.SelectLayout(layout);
-        
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            
+            if (e[Keys.S] && e[Mods.Control])
+            {
+                if (_pm == null) { return; }
+                Encryption.Encrypt(_pm, _password, _file);
+                return;
+            }
+            if (e[Keys.A] && e[Mods.Control])
+            {
+                AddGroupEvent(null, null);
+                return;
+            }
+        }
+        protected override void OnStop(EventArgs e)
+        {
+            base.OnStop(e);
+            
+            _file.Close();
+        }
+        protected override void OnStart(EventArgs e)
+        {
+            base.OnStart(e);
+            
+            _ttb = new TempTextBox(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
+            {
+                TextSize = 30d,
+            };
+            _ttb.Entered += PushGroup;
+            _ttb.Canceled += CancelGroup;
+        }
+
         private void OnPasswordEntered(object sender, EventArgs e)
         {
             PasswordEnter pe = sender as PasswordEnter;
@@ -80,6 +107,11 @@ namespace Encryption
             if (_fileOpen)
             {
                 _pm = Encryption.Decrypt(_file, _password);
+                if (_pm == null)
+                {
+                    pe.Clear();
+                    return;
+                }
             }
             else
             {
