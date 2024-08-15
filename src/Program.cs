@@ -26,11 +26,11 @@ namespace Encryption
             if (args.Length > i)
             {
                 FileAccess fa = ReadOnly ? FileAccess.Read : FileAccess.ReadWrite;
-                w = new Program(800, 500, "WORK", new FileStream(args[i], FileMode.Open, fa));
+                w = new Program(800, 500, "Aes Manager", new FileStream(args[i], FileMode.Open, fa));
             }
             else
             {
-                w = new Program(800, 500, "WORK");
+                w = new Program(800, 500, "Aes Manager");
             }
             
             w.RunMultithread();

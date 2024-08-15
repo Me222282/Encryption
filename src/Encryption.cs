@@ -9,7 +9,7 @@ namespace Encryption
         public static void Encrypt(PasswordManager pm, string password, Stream output)
         {
             AesManaged rm = new AesManaged();
-
+            
             rm.GenerateIV();
 
             Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV);
