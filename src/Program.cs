@@ -9,31 +9,74 @@ namespace Encryption
     class Program : GUIWindow
     {
         public static bool ReadOnly { get; private set; } = false;
+        public static Encryption.Algorithm Algorithm { get; private set; } = Encryption.Algorithm.AES32SHA;
         
         static void Main(string[] args)
         {
             Core.Init();
             
             int i = 0;
-            if (args.Length > 0 && args[i] == "-r")
+            bool algArg = false;
+            for (; i < args.Length; i++)
             {
-                i++;
-                ReadOnly = true;
+                if (algArg)
+                {
+                    Algorithm = args[i].ToLower() switch
+                    {
+                        "aes16_hmac" => Encryption.Algorithm.AES16HMAC,
+                        "aes32_hmac" => Encryption.Algorithm.AES32HMAC,
+                        "aes32_sha" => Encryption.Algorithm.AES32SHA,
+                        _ => (Encryption.Algorithm)(-1)
+                    };
+                    if ((int)Algorithm == -1)
+                    {
+                        Console.WriteLine("Invalid algorithm.");
+                        return;
+                    }
+                    algArg = false;
+                    continue;
+                }
+                
+                if (args[i] == "-r" || args[i] == "--readonly")
+                {
+                    ReadOnly = true;
+                    continue;
+                }
+                if (args[i] == "-a" || args[i] == "--algorithm")
+                {
+                    algArg = true;
+                    continue;
+                }
+                
+                break;
+            }
+            if (algArg)
+            {
+                Console.WriteLine("Missing argument.");
+                return;
             }
             
             Window w;
             
             if (args.Length > i)
             {
+                string path = args[i];
+                if (!File.Exists(path))
+                {
+                    Console.WriteLine($"Could not find file: {path}");
+                    return;
+                }
+                
                 FileAccess fa = ReadOnly ? FileAccess.Read : FileAccess.ReadWrite;
-                w = new Program(800, 500, "Aes Manager", new FileStream(args[i], FileMode.Open, fa));
+                w = new Program(800, 500, "AES Manager", new FileStream(path, FileMode.Open, fa));
             }
             else
             {
-                w = new Program(800, 500, "Aes Manager");
+                w = new Program(800, 500, "AES Manager");
             }
             
             w.RunMultithread();
+            w.Dispose();
             
             Core.Terminate();
         }
