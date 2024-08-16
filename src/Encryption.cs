@@ -104,17 +104,25 @@ namespace Encryption
             
             if (str.StartsWith(AES16HMACKey))
             {
+                input.Position = AES16HMACKey.Length;
                 csDecrypt = AES16HMAC(input, password);
             }
             else if (str.StartsWith(AES32HMACKey))
             {
+                input.Position = AES32HMACKey.Length;
                 csDecrypt = AES32HMAC(input, password);
             }
             else if (str.StartsWith(AES32SHAKey))
             {
+                input.Position = AES32SHAKey.Length;
                 csDecrypt = AES32SHA(input, password);
             }
-            else { return null; }
+            else
+            {
+                // old format
+                input.Position = 0;
+                csDecrypt = AES16HMAC(input, password);
+            }
             
             try
             {
@@ -130,7 +138,6 @@ namespace Encryption
         {
             AesManaged rm = new AesManaged();
             
-            input.Position = 14;
             byte[] iv = new byte[16];
             input.Read(iv);
             
@@ -146,7 +153,6 @@ namespace Encryption
             
             Aes aes = Aes.Create();
             
-            input.Position = 14;
             byte[] iv = new byte[16];
             input.Read(iv);
             
@@ -160,14 +166,13 @@ namespace Encryption
         {
             AesManaged rm = new AesManaged();
             
-            input.Position = 9;
             byte[] iv = new byte[16];
             input.Read(iv);
             
             rm.IV = iv;
             rm.Key = SHA256.HashData(Encoding.UTF8.GetBytes(password));
             
-            return new CryptoStream(input,  rm.CreateDecryptor(), CryptoStreamMode.Read, true);
+            return new CryptoStream(input, rm.CreateDecryptor(), CryptoStreamMode.Read, true);
         }
     }
 }
