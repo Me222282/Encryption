@@ -40,8 +40,10 @@ namespace Encryption
             _inputLayout = new ElementManager(_root);
             _viewLayout = new ElementManager(_root);
             
-            _xml.LoadGUI(_inputLayout, File.ReadAllText("Layouts/passwordInput.xml"));
-            _xml.LoadGUI(_viewLayout, File.ReadAllText("Layouts/passwordManage.xml"));
+            string folder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            
+            _xml.LoadGUI(_inputLayout, File.ReadAllText(folder + "/Layouts/passwordInput.xml"));
+            _xml.LoadGUI(_viewLayout, File.ReadAllText(folder + "/Layouts/passwordManage.xml"));
         }
         
         private Xml _xml;
