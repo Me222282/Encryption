@@ -113,11 +113,8 @@ namespace Encryption
             Button ib = sender as Button;
             if (ib == null) { return; }
             
-            Actions.Push(() =>
-            {
-                _ec.Entries.RemoveAll(t => ib.Id == t.Key);
-                RemoveChild(ib.Parent);
-            });
+            _ec.Entries.RemoveAll(t => ib.Id == t.Key);
+            RemoveChild(ib.Parent);
         }
         private void CopyEvent(object sender, EventArgs e)
         {
@@ -128,24 +125,22 @@ namespace Encryption
         }
         private void AddEntryEvent(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                _addLabel.Text = "";
-                _addValue.Text = "";
-                RemoveChild(_addEG);
-                AddChild(_addGroup);
-                Handle.Focus = _addLabel;
-            });
+            ListActions la = Children.StartGroupAction();
+            _addLabel.Text = "";
+            _addValue.Text = "";
+            la.Remove(_addEG);
+            la.Add(_addGroup);
+            la.EndingFocus = _addLabel;
+            la.Apply();
         }
         private void ConfirmEvent(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                RemoveChild(_addGroup);
-                ManageConfirm();
-                AddChild(_addEG);
-                Handle.Focus = _addEG;
-            });
+            ListActions la = Children.StartGroupAction();
+            la.Remove(_addGroup);
+            ManageConfirm();
+            la.Add(_addEG);
+            la.EndingFocus = _addEG;
+            la.Apply();
         }
         private void ManageConfirm()
         {
@@ -160,19 +155,15 @@ namespace Encryption
         }
         private void CancelEvent(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                RemoveChild(_addGroup);
-                AddChild(_addEG);
-                Handle.Focus = _addEG;
-            });
+            ListActions la = Children.StartGroupAction();
+            la.Remove(_addGroup);
+            la.Add(_addEG);
+            la.EndingFocus = _addEG;
+            la.Apply();
         }
         private void DeleteGroup(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                Parent.Children.Remove(this);
-            });
+            Parent.Children.Remove(this);
         }
     }
 }

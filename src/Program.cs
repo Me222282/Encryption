@@ -197,25 +197,24 @@ namespace Encryption
                 _pm = new PasswordManager();
             }
             
-            Actions.Push(() =>
-            {
-                LoadPMElements(_lm.ViewContainer);
-                LoadLayout(LayoutSelect.View);
-            });
+            ListActions la = _lm.ViewContainer.Children.StartGroupAction();
+            LoadPMElements(la);
+            la.Apply();
+            LoadLayout(LayoutSelect.View);
         }
         
         private Button _addGroup;
         private TempTextBox _ttb;
         private ScaleLayout _scaleLayout = new ScaleLayout(5d);
         private Layout _countainerL = new Layout(0d, 0d, 1.9d, 0d);
-        private void LoadPMElements(IElement container)
+        private void LoadPMElements(ListActions container)
         {
-            container.Children.Clear();
+            container.Clear();
             
             foreach (EntryContainer ec in _pm)
             {
                 //AddContainer(container, ec);
-                container.Children.Add(new ECElement(_countainerL, _scaleLayout, ec));
+                container.Add(new ECElement(_countainerL, _scaleLayout, ec));
             }
             
             if (Program.ReadOnly) { return; }
@@ -227,53 +226,42 @@ namespace Encryption
                 BorderWidth = 0
             };
             _addGroup.Click += AddGroupEvent;
-            container.Children.Add(_addGroup);
-        }
-        private void AddContainer(IElement parent, EntryContainer ec)
-        {
-            Container c = new Container(_countainerL);
-            c.Graphics.Colour = ColourF.DarkGrey;
-            c.LayoutManager = _scaleLayout;
-            c.AddChild(new Label(new TextLayout(5d, 5d)) { Text = ec.Name, TextSize = 20d, BorderWidth = 0 });
-            c.AddChild(new Button(new TextLayout(5d, 5d, 0d, 0d, 0.5, 0d)) { Text = "Add Entry", TextSize = 20d });
-            
-            parent.Children.Add(c);
+            container.Add(_addGroup);
         }
         
         private void CancelGroup(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                _lm.ViewContainer.Children.Remove(_ttb);
-                _lm.ViewContainer.Children.Add(_addGroup);
-                RootElement.Focus = _addGroup;
-            });
+            ListActions la = _lm.ViewContainer.Children.StartGroupAction();
+            la.Remove(_ttb);
+            la.Add(_addGroup);
+            la.EndingFocus = _addGroup;
+            la.Apply();
         }
         private void AddGroupEvent(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                _ttb.Text = "";
-                _lm.ViewContainer.Children.Remove(_addGroup);
-                _lm.ViewContainer.Children.Add(_ttb);
-                RootElement.Focus = _ttb;
-            });
+            ListActions la = _lm.ViewContainer.Children.StartGroupAction();
+            _ttb.Text = "";
+            la.Remove(_addGroup);
+            la.Add(_ttb);
+            la.EndingFocus = _ttb;
+            la.Apply();
         }
         private void PushGroup(object sender, EventArgs e)
         {
-            Actions.Push(() =>
-            {
-                string name = _ttb.Text;
-                _lm.ViewContainer.Children.Remove(_ttb);
-                if (name == null) { return; }
-                name = name.Trim();
-                if (name.Length == 0) { return; }
-                
-                ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
-                _lm.ViewContainer.Children.Add(ece);
-                _lm.ViewContainer.Children.Add(_addGroup);
-                RootElement.Focus = ece;
-            });
+            ListActions la = _lm.ViewContainer.Children.StartGroupAction();
+            
+            string name = _ttb.Text;
+            la.Remove(_ttb);
+            if (name == null) { return; }
+            name = name.Trim();
+            if (name.Length == 0) { return; }
+            
+            ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
+            la.Add(ece);
+            la.Add(_addGroup);
+            la.EndingFocus = ece;
+            
+            la.Apply();
         }
     }
 }

@@ -56,7 +56,8 @@ namespace Encryption
         
         public void SelectLayout(LayoutSelect layout)
         {
-            _root.ClearChildren();
+            ListActions la = _root.Elements.StartGroupAction();
+            la.Clear();
             
             ElementManager select = layout switch
             {
@@ -73,8 +74,10 @@ namespace Encryption
             
             for (int i = 0; i < select.Length; i++)
             {
-                _root.AddChild(select[i]);
+                la.Add(select[i]);
             }
+            
+            la.Apply();
         }
     }
 }
