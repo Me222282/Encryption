@@ -20,26 +20,28 @@ namespace Encryption
             {
                 get
                 {
-                    double h = -_lowest;
-                    if (h == 0d) { h = _rs.Y; }
+                    float h = -_lowest;
+                    if (h == 0f) { h = _rs.Y; }
                     // No scrolling
                     _e.Properties.ScrollBar = null;
-                    _e.Properties.ViewPan = (0d, h * 0.5d);
+                    _e.Properties.ViewPan = (0f, h * 0.5f);
                     return new Vector2(_rs.X, h);
                 }
             }
-            public double _left;
-            public double _right;
-            public double _lowest;
+            public float _left;
+            public float _right;
+            public float _lowest;
             public Vector2 _current;
             
-            public void SetLowest(double value)
+            public void SetLowest(float value)
             {
                 if (_lowest > value)
                 {
                     _lowest = value;
                 }
             }
+            
+            public Vector2 ChildOffset => Vector2.Zero;
         }
 
         public ScaleLayout2()
@@ -60,17 +62,17 @@ namespace Encryption
         {
             _margin = (margin, margin);
         }
-        public ScaleLayout2(double margin)
+        public ScaleLayout2(float margin)
             : base(true, false)
         {
             _margin = (margin, margin, margin, margin);
         }
-        public ScaleLayout2(double marginX, double marginY)
+        public ScaleLayout2(float marginX, float marginY)
             : base(true, false)
         {
             _margin = (marginX, marginY, marginX, marginY);
         }
-        public ScaleLayout2(double left, double right, double top, double bottom)
+        public ScaleLayout2(float left, float right, float top, float bottom)
             : base(true, false)
         {
             _margin = (left, top, right, bottom);
@@ -96,7 +98,7 @@ namespace Encryption
         /// <summary>
         /// The margin on the left side.
         /// </summary>
-        public double Left
+        public float Left
         {
             get => _margin.X;
             set
@@ -110,7 +112,7 @@ namespace Encryption
         /// <summary>
         /// The margin on the right side.
         /// </summary>
-        public double Right
+        public float Right
         {
             get => _margin.Z;
             set
@@ -124,7 +126,7 @@ namespace Encryption
         /// <summary>
         /// The margin on the top side.
         /// </summary>
-        public double Top
+        public float Top
         {
             get => _margin.Y;
             set
@@ -138,7 +140,7 @@ namespace Encryption
         /// <summary>
         /// The margin on the bottom side.
         /// </summary>
-        public double Bottom
+        public float Bottom
         {
             get => _margin.W;
             set
@@ -154,9 +156,9 @@ namespace Encryption
         {
             Instance i = new Instance(args.Size, args.Element);
 
-            i._right = args.Size.X * 0.5;
+            i._right = args.Size.X * 0.5f;
             i._left = -i._right;
-            i._lowest = args.Size.Y * 0.5;
+            i._lowest = args.Size.Y * 0.5f;
 
             i._current = (i._left, i._lowest - _margin.Y);
 

@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/bin/Debug/net5.0/Encryption.dll",
+            "program": "${workspaceFolder}/src/bin/Debug/net8.0/Encryption.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src",
             "console": "externalTerminal",

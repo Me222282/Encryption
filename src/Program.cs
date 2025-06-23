@@ -9,6 +9,7 @@ namespace Encryption
     class Program : GUIWindow
     {
         public static bool ReadOnly { get; private set; } = false;
+        // DO NOT SET LATER
         public static Encryption.Algorithm Algorithm { get; private set; } = Encryption.Algorithm.AES32SHA;
         
         static void Main(string[] args)
@@ -23,8 +24,8 @@ namespace Encryption
                 {
                     Algorithm = args[i].ToLower() switch
                     {
-                        "aes16_hmac" => Encryption.Algorithm.AES16HMAC,
-                        "aes32_hmac" => Encryption.Algorithm.AES32HMAC,
+                        // "aes16_hmac" => Encryption.Algorithm.AES16HMAC,
+                        // "aes32_hmac" => Encryption.Algorithm.AES32HMAC,
                         "aes32_sha" => Encryption.Algorithm.AES32SHA,
                         _ => (Encryption.Algorithm)(-1)
                     };
@@ -94,17 +95,17 @@ namespace Encryption
         public Program(int width, int height, string title)
             : base(width, height, title)
         {
-            //_file = new FileStream("passwords.aes", FileMode.Create);
+            _file = new FileStream("passwords.aes", FileMode.Create);
             _fileOpen = false;
             
             _lm = new LayoutManager(RootElement, new Xml());
-            //LoadLayout(LayoutSelect.Input);
+            LoadLayout(LayoutSelect.Input);
         }
         
         private bool _fileOpen;
         private Stream _file;
         private PasswordManager _pm;
-        private string _password;
+        private byte[] _key;
         
         private LayoutManager _lm;
         
@@ -117,7 +118,7 @@ namespace Encryption
             if (e[Keys.S] && e[Mods.Control])
             {
                 if (_pm == null || ReadOnly) { return; }
-                Encryption.Encrypt(_pm, _password, _file);
+                Encryption.Encrypt(_pm, _key, _file);
                 return;
             }
             if (e[Keys.A] && e[Mods.Control])
@@ -130,9 +131,9 @@ namespace Encryption
             {
                 if (ReadOnly) { return; }
                 //if (RootElement.Elements.Length > 0) { return; }
-                if (_pm != null && !ReadOnly)
+                if (_pm != null)
                 {
-                    Encryption.Encrypt(_pm, _password, _file);
+                    Encryption.Encrypt(_pm, _key, _file);
                     _pm = null;
                 }
                 LoadLayout(LayoutSelect.Input);
@@ -148,7 +149,7 @@ namespace Encryption
             
             if (_pm != null && !ReadOnly)
             {
-                Encryption.Encrypt(_pm, _password, _file);
+                Encryption.Encrypt(_pm, _key, _file);
             }
             
             if (_file == null) { return; }
@@ -158,9 +159,9 @@ namespace Encryption
         {
             base.OnStart(e);
             
-            _ttb = new TempTextBox(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
+            _ttb = new TempTextBox(new TextLayout(5f, 5f, 0f, 0f, 1.9f, 0f, true))
             {
-                TextSize = 30d,
+                TextSize = 30f,
             };
             _ttb.Entered += PushGroup;
             _ttb.Canceled += CancelGroup;
@@ -172,7 +173,7 @@ namespace Encryption
             //if (RootElement.Elements.Length > 0) { return; }
             if (_pm != null && !Program.ReadOnly)
             {
-                Encryption.Encrypt(_pm, _password, _file);
+                Encryption.Encrypt(_pm, _key, _file);
                 _pm = null;
             }
             LoadLayout(LayoutSelect.Input);
@@ -184,18 +185,21 @@ namespace Encryption
         private void OnPasswordEntered(object sender, EventArgs e)
         {
             PasswordEnter pe = sender as PasswordEnter;
-            _password = pe.GetPassword();
+            string password = pe.GetPassword();
             pe.Clear();
+            _key = Encryption.GetEncryptKey(password);
             
             if (_fileOpen)
             {
-                _pm = Encryption.Decrypt(_file, _password);
+                _pm = Encryption.Decrypt(_file, password);
                 if (_pm == null) { return; }
             }
             else
             {
                 _pm = new PasswordManager();
             }
+            
+            GC.Collect();
             
             ListActions la = _lm.ViewContainer.Children.StartGroupAction();
             LoadPMElements(la);
@@ -205,8 +209,8 @@ namespace Encryption
         
         private Button _addGroup;
         private TempTextBox _ttb;
-        private ScaleLayout _scaleLayout = new ScaleLayout(5d);
-        private Layout _countainerL = new Layout(0d, 0d, 1.9d, 0d);
+        private ScaleLayout _scaleLayout = new ScaleLayout(5f);
+        private Layout _countainerL = new Layout(0f, 0f, 1.9f, 0f);
         private void LoadPMElements(ListActions container)
         {
             container.Clear();
@@ -219,9 +223,9 @@ namespace Encryption
             
             if (Program.ReadOnly) { return; }
             
-            _addGroup = new Button(new TextLayout(5d, 5d, 0d, 0d, 1.9d, 0d, true))
+            _addGroup = new Button(new TextLayout(5f, 5f, 0f, 0f, 1.9f, 0f, true))
             {
-                TextSize = 30d,
+                TextSize = 30f,
                 Text = "Add Group",
                 BorderWidth = 0
             };

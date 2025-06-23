@@ -26,7 +26,7 @@ namespace Encryption
             return Encoding.Latin1.GetString(buffer.Slice(0, nc));
         }
         
-        public static void Encrypt(PasswordManager pm, string password, Stream output)
+        public static void Encrypt(PasswordManager pm, byte[] key, Stream output)
         {
             output.Position = 0;
             string alg = Program.Algorithm switch
@@ -38,60 +38,36 @@ namespace Encryption
             };
             output.WriteString(alg);
             
-            CryptoStream csEncrypt;
-            
-            if (Program.Algorithm == Algorithm.AES16HMAC)
-            {
-                csEncrypt = EnAES16HMAC(output, password);
-            }
-            else if (Program.Algorithm == Algorithm.AES32HMAC)
-            {
-                csEncrypt = EnAES32HMAC(output, password);
-            }
-            else if (Program.Algorithm == Algorithm.AES32SHA)
-            {
-                csEncrypt = EnAES32SHA(output, password);
-            }
-            else { return; }
+            CryptoStream csEncrypt = EnAES(output, key);
             
             // Write json file
             pm.WriteToStream(csEncrypt);
             
             csEncrypt.Dispose();
         }
+        public static byte[] GetEncryptKey(string password)
+        {
+            switch (Program.Algorithm)
+            {
+                case Algorithm.AES16HMAC:
+                case Algorithm.AES32HMAC:
+                    throw new Exception("Method obsolete");
+                case Algorithm.AES32SHA:
+                    byte[] pb = Encoding.UTF8.GetBytes(password);
+                    byte[] key = SHA256.HashData(pb);
+                    return key;
+            }
+            
+            throw new Exception("Missing algorithm.");
+        }
         
-        private static CryptoStream EnAES16HMAC(Stream output, string password)
+        private static CryptoStream EnAES(Stream output, byte[] key)
         {
-            AesManaged rm = new AesManaged();
+            Aes rm = Aes.Create();
             
             rm.GenerateIV();
             output.Write(rm.IV);
-            
-            Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV);
-            rm.Key = rdb.GetBytes(16);
-            
-            return new CryptoStream(output, rm.CreateEncryptor(), CryptoStreamMode.Write, true);
-        }
-        private static CryptoStream EnAES32HMAC(Stream output, string password)
-        {
-            AesManaged rm = new AesManaged();
-            
-            rm.GenerateIV();
-            output.Write(rm.IV);
-            
-            Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV);
-            rm.Key = rdb.GetBytes(32);
-            
-            return new CryptoStream(output, rm.CreateEncryptor(), CryptoStreamMode.Write, true);
-        }
-        private static CryptoStream EnAES32SHA(Stream output, string password)
-        {
-            AesManaged rm = new AesManaged();
-            
-            rm.GenerateIV();
-            output.Write(rm.IV);
-            
-            rm.Key = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+            rm.Key = key;
             
             return new CryptoStream(output, rm.CreateEncryptor(), CryptoStreamMode.Write, true);
         }
@@ -136,7 +112,7 @@ namespace Encryption
         }
         private static CryptoStream AES16HMAC(Stream input, string password)
         {
-            AesManaged rm = new AesManaged();
+            Aes rm = Aes.Create();
             
             byte[] iv = new byte[16];
             input.Read(iv);
@@ -149,9 +125,7 @@ namespace Encryption
         }
         private static CryptoStream AES32HMAC(Stream input, string password)
         {
-            AesManaged rm = new AesManaged();
-            
-            Aes aes = Aes.Create();
+            Aes rm = Aes.Create();
             
             byte[] iv = new byte[16];
             input.Read(iv);
@@ -164,7 +138,7 @@ namespace Encryption
         }
         private static CryptoStream AES32SHA(Stream input, string password)
         {
-            AesManaged rm = new AesManaged();
+            Aes rm = Aes.Create();
             
             byte[] iv = new byte[16];
             input.Read(iv);
