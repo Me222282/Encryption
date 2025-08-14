@@ -20,7 +20,7 @@ namespace Encryption
             Span<KeyValuePair<string, string>> span = CollectionsMarshal.AsSpan(ec.Entries);
             for (int i = 0; i < span.Length; i++)
             {
-                AddEntry(span[i].Key);
+                AddChild(CreateEntryGraphic(span[i].Key));
             }
             
             if (Program.ReadOnly) { return; }
@@ -69,14 +69,15 @@ namespace Encryption
         private Layout _cl = new Layout(0f, 0f, 1.9f, 0f);
         private TextLayout _llb = new TextLayout(5f, 5f, 0f, 0f, 0.7f, 0f);
         private TextLayout _tl2 = new TextLayout(5f, 5f);
-        private TextLayout _tl3 = new TextLayout(5f, 5f);
         private ScaleLayout2 _scaleLayout = new ScaleLayout2(5f);
         
         private Container _addGroup;
         private TextInput _addLabel;
         private TextInput _addValue;
+        private int _addIndex;
+        private IElement _oldGroup;
         
-        private void AddEntry(string name)
+        private Container CreateEntryGraphic(string name)
         {
             Container c = new Container(_cl);
             c.LayoutManager = _scaleLayout;
@@ -94,6 +95,16 @@ namespace Encryption
             
             if (!Program.ReadOnly)
             {
+                Button ce = new Button(_tl2)
+                {
+                    Text = "Edit",
+                    TextSize = 15f,
+                    BorderWidth = 0f,
+                    Id = name
+                };
+                ce.Click += EditEvent;
+                c.AddChild(ce);
+                
                 Button cd = new Button(_tl2)
                 {
                     Text = "Del",
@@ -105,7 +116,7 @@ namespace Encryption
                 c.AddChild(cd);
             }
             
-            AddChild(c);
+            return c;
         }
         
         private void DeleteEvent(object sender, EventArgs e)
@@ -116,6 +127,30 @@ namespace Encryption
             _ec.Entries.RemoveAll(t => ib.Id == t.Key);
             RemoveChild(ib.Parent);
         }
+        private void EditEvent(object sender, EventArgs e)
+        {
+            // cancel old action first 
+            // simpler if multiple cannot be changed at the same time
+            if (_addGroup.Parent == this)
+            {
+                CancelEvent(null, null);
+            }
+            
+            Button ib = sender as Button;
+            if (ib == null) { return; }
+            
+            int index = _ec.Entries.FindIndex(t => ib.Id == t.Key);
+            _addIndex = index;
+            _addLabel.Text = ib.Id;
+            _addValue.Text = _ec.Entries[index].Value;
+            
+            ListActions la = Children.StartGroupAction();
+            
+            _oldGroup = ib.Parent;
+            la.Replace(ib.Parent, _addGroup);
+            la.EndingFocus = _addLabel;
+            la.Apply();
+        }
         private void CopyEvent(object sender, EventArgs e)
         {
             Button ib = sender as Button;
@@ -125,39 +160,54 @@ namespace Encryption
         }
         private void AddEntryEvent(object sender, EventArgs e)
         {
+            // cancel old action first 
+            // simpler if multiple cannot be changed at the same time
+            if (_addGroup.Parent == this)
+            {
+                CancelEvent(null, null);
+            }
+            
             ListActions la = Children.StartGroupAction();
             _addLabel.Text = "";
             _addValue.Text = "";
-            la.Remove(_addEG);
-            la.Add(_addGroup);
+            
+            _oldGroup = null;
+            _addIndex = _ec.Entries.Count;
+            _ec.Entries.Add(new KeyValuePair<string, string>());
+            
+            // la.Remove(_addEG);
+            int end = Children.IndexOf(_addEG);
+            la.Insert(end, _addGroup);
             la.EndingFocus = _addLabel;
             la.Apply();
         }
         private void ConfirmEvent(object sender, EventArgs e)
         {
             ListActions la = Children.StartGroupAction();
-            la.Remove(_addGroup);
-            ManageConfirm();
-            la.Add(_addEG);
+            IElement rep = ManageConfirm();
+            la.Replace(_addGroup, rep);
+            _oldGroup = null;
+            // la.Add(_addEG);
             la.EndingFocus = _addEG;
             la.Apply();
         }
-        private void ManageConfirm()
+        private Container ManageConfirm()
         {
             string key = _addLabel.Text;
             string value = _addValue.Text;
-            if (key == null || value == null) { return; }
+            if (key == null || value == null) { return null; }
             key = key.Trim();
-            if (key.Length == 0 || value.Length == 0) { return; }
+            if (key.Length == 0 || value.Length == 0) { return null; }
             
-            _ec.Entries.Add(new KeyValuePair<string, string>(key, value));
-            AddEntry(key);
+            _ec.Entries[_addIndex] = new KeyValuePair<string, string>(key, value);
+            return CreateEntryGraphic(key);
         }
         private void CancelEvent(object sender, EventArgs e)
         {
             ListActions la = Children.StartGroupAction();
-            la.Remove(_addGroup);
-            la.Add(_addEG);
+            la.Replace(_addGroup, _oldGroup);
+            _oldGroup = null;
+            // la.Add(_addEG);
             la.EndingFocus = _addEG;
             la.Apply();
         }

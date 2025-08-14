@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Zene.Graphics;
 
 namespace Encryption
 {
@@ -65,7 +67,7 @@ namespace Encryption
         {
             Aes rm = Aes.Create();
             
-            rm.GenerateIV();
+            // rm.GenerateIV();
             output.Write(rm.IV);
             rm.Key = key;
             
@@ -109,6 +111,17 @@ namespace Encryption
                 csDecrypt.Dispose();
                 return null;
             }
+        }
+        private static byte[] ReadAll(Stream input)
+        {
+            List<byte> l = new List<byte>();
+            int bt = input.ReadByte();
+            while (bt >= 0)
+            {
+                l.Add((byte)bt);
+                bt = input.ReadByte();
+            }
+            return l.ToArray();
         }
         private static CryptoStream AES16HMAC(Stream input, string password)
         {

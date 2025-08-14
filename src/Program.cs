@@ -53,7 +53,7 @@ namespace Encryption
             }
             if (algArg)
             {
-                Console.WriteLine("Missing argument.");
+                Console.WriteLine($"Missing argument after {args[i - 1]}.");
                 return;
             }
             
@@ -95,11 +95,11 @@ namespace Encryption
         public Program(int width, int height, string title)
             : base(width, height, title)
         {
-            _file = new FileStream("passwords.aes", FileMode.Create);
+            // _file = new FileStream("passwords.aes", FileMode.Create);
             _fileOpen = false;
             
             _lm = new LayoutManager(RootElement, new Xml());
-            LoadLayout(LayoutSelect.Input);
+            // LoadLayout(LayoutSelect.Input);
         }
         
         private bool _fileOpen;
