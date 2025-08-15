@@ -20,7 +20,6 @@ namespace Encryption
             container1.Layout = new Layout(0f, 0f, 2f, 2f);
             container1.LayoutManager = new BlockLayout(5.0f);
             el.Add(container1);
-            
         }
     }
 }

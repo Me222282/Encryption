@@ -34,7 +34,6 @@ namespace Encryption
             
             container1.Colour = new ColourF(0.1f, 0.1f, 0.1f);
             el.Add(container1);
-            
         }
     }
 }
