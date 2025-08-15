@@ -6,7 +6,7 @@ using Zene.Windowing;
 
 namespace Encryption
 {
-    class Program : GUIWindow
+    public class Program : GUIWindow
     {
         public static bool ReadOnly { get; private set; } = false;
         
@@ -57,7 +57,7 @@ namespace Encryption
             _file = file;
             _fileOpen = true;
             
-            _lm = new LayoutManager(RootElement, new Xml());
+            _lm = new LayoutManager(RootElement, this);
             LoadLayout(LayoutSelect.Input);
         }
         
@@ -67,7 +67,7 @@ namespace Encryption
             // _file = new FileStream("passwords.aes", FileMode.Create);
             _fileOpen = false;
             
-            _lm = new LayoutManager(RootElement, new Xml());
+            _lm = new LayoutManager(RootElement, this);
             // LoadLayout(LayoutSelect.Input);
         }
         
@@ -151,7 +151,7 @@ namespace Encryption
             _fileOpen = true;
         }
 
-        private void OnPasswordEntered(object sender, EventArgs e)
+        internal void OnPasswordEntered(object sender, EventArgs e)
         {
             PasswordEnter pe = sender as PasswordEnter;
             string password = pe.GetPassword();
@@ -173,6 +173,9 @@ namespace Encryption
             ListActions la = _lm.ViewContainer.Children.StartGroupAction();
             LoadPMElements(la);
             la.Apply();
+            // reset to origin
+            _lm.ViewContainer.Properties.SetYScroll(0f);
+            _lm.ViewContainer.Properties.SetXScroll(0f);
             LoadLayout(LayoutSelect.View);
         }
         

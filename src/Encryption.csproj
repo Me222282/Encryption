@@ -12,13 +12,13 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   
-  <ItemGroup>
+  <!-- <ItemGroup>
     <None Update="Layouts/passwordInput.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Layouts/passwordManage.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
+  </ItemGroup> -->
 
 </Project>

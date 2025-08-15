@@ -32,21 +32,23 @@ namespace Encryption
             public override void RemoveAt(int index) => _elements.RemoveAt(index);
         }
         
-        public LayoutManager(RootElement rootElement, Xml xml)
+        public LayoutManager(RootElement rootElement, Program p)
         {
             _root = rootElement;
-            _xml = xml;
+            // _xml = xml;
             
             _inputLayout = new ElementManager(_root);
             _viewLayout = new ElementManager(_root);
             
             string folder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             
-            _xml.LoadGUI(_inputLayout, File.ReadAllText(folder + "/Layouts/passwordInput.xml"));
-            _xml.LoadGUI(_viewLayout, File.ReadAllText(folder + "/Layouts/passwordManage.xml"));
+            // _xml.LoadGUI(_inputLayout, File.ReadAllText(folder + "/Layouts/passwordInput.xml"));
+            // _xml.LoadGUI(_viewLayout, File.ReadAllText(folder + "/Layouts/passwordManage.xml"));
+            passwordInput.LoadGUI(_inputLayout, p);
+            passwordManage.LoadGUI(_viewLayout);
         }
         
-        private Xml _xml;
+        // private Xml _xml;
         private RootElement _root;
         
         private ElementManager _inputLayout;
