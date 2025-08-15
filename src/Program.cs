@@ -9,52 +9,21 @@ namespace Encryption
     class Program : GUIWindow
     {
         public static bool ReadOnly { get; private set; } = false;
-        // DO NOT SET LATER
-        public static Encryption.Algorithm Algorithm { get; private set; } = Encryption.Algorithm.AES32SHA;
         
         static void Main(string[] args)
         {
             Core.Init();
             
             int i = 0;
-            bool algArg = false;
             for (; i < args.Length; i++)
-            {
-                if (algArg)
-                {
-                    Algorithm = args[i].ToLower() switch
-                    {
-                        // "aes16_hmac" => Encryption.Algorithm.AES16HMAC,
-                        // "aes32_hmac" => Encryption.Algorithm.AES32HMAC,
-                        "aes32_sha" => Encryption.Algorithm.AES32SHA,
-                        _ => (Encryption.Algorithm)(-1)
-                    };
-                    if ((int)Algorithm == -1)
-                    {
-                        Console.WriteLine("Invalid algorithm.");
-                        return;
-                    }
-                    algArg = false;
-                    continue;
-                }
-                
+            {   
                 if (args[i] == "-r" || args[i] == "--readonly")
                 {
                     ReadOnly = true;
                     continue;
                 }
-                if (args[i] == "-a" || args[i] == "--algorithm")
-                {
-                    algArg = true;
-                    continue;
-                }
                 
                 break;
-            }
-            if (algArg)
-            {
-                Console.WriteLine($"Missing argument after {args[i - 1]}.");
-                return;
             }
             
             Window w;

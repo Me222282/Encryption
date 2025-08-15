@@ -9,13 +9,6 @@ namespace Encryption
 {
     public static class Encryption
     {
-        public enum Algorithm
-        {
-            AES16HMAC,
-            AES32HMAC,
-            AES32SHA
-        }
-        
         private const string AES16HMACKey = "AES16_HMACSHA1";
         private const string AES32HMACKey = "AES32_HMACSHA1";
         private const string AES32SHAKey = "AES32_SHA";
@@ -31,14 +24,7 @@ namespace Encryption
         public static void Encrypt(PasswordManager pm, byte[] key, Stream output)
         {
             output.Position = 0;
-            string alg = Program.Algorithm switch
-            {
-                Algorithm.AES16HMAC => AES16HMACKey,
-                Algorithm.AES32HMAC => AES32HMACKey,
-                Algorithm.AES32SHA => AES32SHAKey,
-                _ => throw new Exception()
-            };
-            output.WriteString(alg);
+            output.WriteString(AES32SHAKey);
             
             CryptoStream csEncrypt = EnAES(output, key);
             
@@ -49,18 +35,8 @@ namespace Encryption
         }
         public static byte[] GetEncryptKey(string password)
         {
-            switch (Program.Algorithm)
-            {
-                case Algorithm.AES16HMAC:
-                case Algorithm.AES32HMAC:
-                    throw new Exception("Method obsolete");
-                case Algorithm.AES32SHA:
-                    byte[] pb = Encoding.UTF8.GetBytes(password);
-                    byte[] key = SHA256.HashData(pb);
-                    return key;
-            }
-            
-            throw new Exception("Missing algorithm.");
+            byte[] pb = Encoding.UTF8.GetBytes(password);
+            return SHA256.HashData(pb);
         }
         
         private static CryptoStream EnAES(Stream output, byte[] key)
@@ -131,7 +107,8 @@ namespace Encryption
             input.Read(iv);
             
             rm.IV = iv;
-            Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV);
+            // original default iterations and algorithm - obsolete due to security risks
+            Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV, 1000, HashAlgorithmName.SHA1);
             rm.Key = rdb.GetBytes(16);
             
             return new CryptoStream(input,  rm.CreateDecryptor(), CryptoStreamMode.Read, true);
@@ -144,7 +121,8 @@ namespace Encryption
             input.Read(iv);
             
             rm.IV = iv;
-            Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV);
+            // original default iterations and algorithm - obsolete due to security risks
+            Rfc2898DeriveBytes rdb = new Rfc2898DeriveBytes(password, rm.IV, 1000, HashAlgorithmName.SHA1);
             rm.Key = rdb.GetBytes(32);
             
             return new CryptoStream(input,  rm.CreateDecryptor(), CryptoStreamMode.Read, true);
