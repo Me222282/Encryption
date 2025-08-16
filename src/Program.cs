@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Zene.GUI;
-using Zene.Structs;
 using Zene.Windowing;
 
 namespace Encryption
