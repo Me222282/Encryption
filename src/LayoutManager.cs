@@ -61,6 +61,7 @@ namespace Encryption
         
         public IElement ViewContainer => _viewLayout[0].Children[2];
         public TextElement PathLabel => _inputLayout[0] as TextElement;
+        private IElement _errorLabel => _inputLayout[2];
         
         public void SelectLayout(LayoutSelect layout)
         {
@@ -81,12 +82,20 @@ namespace Encryption
             //     return;
             // }
             
+            _errorLabel.Properties.Visable = false;
+            
             for (int i = 0; i < select.Length; i++)
             {
                 la.Add(select[i]);
             }
             
             la.Apply();
+        }
+        
+        public void ShowError()
+        {
+            _errorLabel.Properties.Visable = true;
+            _root.LayoutElement(_root);
         }
     }
 }

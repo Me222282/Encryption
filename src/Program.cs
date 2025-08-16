@@ -163,7 +163,11 @@ namespace Encryption
             if (_fileOpen)
             {
                 _pm = Encryption.Decrypt(_file, password);
-                if (_pm == null) { return; }
+                if (_pm == null)
+                {
+                    _lm.ShowError();
+                    return;
+                }
             }
             else
             {
