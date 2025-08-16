@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Zene.Graphics;
 
 namespace Encryption
 {
@@ -12,6 +11,7 @@ namespace Encryption
         private const string AES16HMACKey = "AES16_HMACSHA1";
         private const string AES32HMACKey = "AES32_HMACSHA1";
         private const string AES32SHAKey = "AES32_SHA";
+        private const string AES32SHAKeyNew = "AES32_v2_SHA";
         
         private static void WriteString(this Stream stream, string str) => stream.Write(Encoding.Latin1.GetBytes(str));
         private static string ReadString(this Stream stream, int count)
@@ -24,7 +24,7 @@ namespace Encryption
         public static void Encrypt(PasswordManager pm, byte[] key, Stream output)
         {
             output.Position = 0;
-            output.WriteString(AES32SHAKey);
+            output.WriteString(AES32SHAKeyNew);
             
             CryptoStream csEncrypt = EnAES(output, key);
             
@@ -56,7 +56,18 @@ namespace Encryption
             string str = input.ReadString(14);
             CryptoStream csDecrypt;
             
-            if (str.StartsWith(AES16HMACKey))
+            bool v2 = str.StartsWith(AES32SHAKeyNew);
+            if (v2)
+            {
+                input.Position = AES32SHAKeyNew.Length;
+                csDecrypt = AES32SHA(input, password);
+            }
+            else if (str.StartsWith(AES32SHAKey))
+            {
+                input.Position = AES32SHAKey.Length;
+                csDecrypt = AES32SHA(input, password);
+            }
+            else if (str.StartsWith(AES16HMACKey))
             {
                 input.Position = AES16HMACKey.Length;
                 csDecrypt = AES16HMAC(input, password);
@@ -65,11 +76,6 @@ namespace Encryption
             {
                 input.Position = AES32HMACKey.Length;
                 csDecrypt = AES32HMAC(input, password);
-            }
-            else if (str.StartsWith(AES32SHAKey))
-            {
-                input.Position = AES32SHAKey.Length;
-                csDecrypt = AES32SHA(input, password);
             }
             else
             {
@@ -80,7 +86,7 @@ namespace Encryption
             
             try
             {
-                return new PasswordManager(csDecrypt);
+                return new PasswordManager(csDecrypt, !v2);
             }
             catch (Exception)
             {

@@ -12,7 +12,7 @@ namespace Encryption
             : base(layout)
         {
             LayoutManager = lm;
-            _ec = ec;
+            EC = ec;
             Graphics.Colour = ColourF.Grey;
             
             AddChild(new Label(_tl2) { Text = ec.Name, TextSize = 20f, BorderWidth = 0f });
@@ -65,8 +65,8 @@ namespace Encryption
         }
         
         private Container _addEG;
-        private EntryContainer _ec;
-        private Layout _cl = new Layout(0f, 0f, 1.9f, 0f);
+        public EntryContainer EC;
+        private Layout _cl = new Layout(0f, 0f, 2f, 0f);
         private TextLayout _llb = new TextLayout(5f, 5f, 0f, 0f, 0.7f, 0f);
         private TextLayout _tl2 = new TextLayout(5f, 5f);
         private ScaleLayout2 _scaleLayout = new ScaleLayout2(5f);
@@ -124,7 +124,7 @@ namespace Encryption
             Button ib = sender as Button;
             if (ib == null) { return; }
             
-            _ec.Entries.RemoveAll(t => ib.Id == t.Key);
+            EC.Entries.RemoveAll(t => ib.Id == t.Key);
             RemoveChild(ib.Parent);
         }
         private void EditEvent(object sender, EventArgs e)
@@ -139,10 +139,10 @@ namespace Encryption
             Button ib = sender as Button;
             if (ib == null) { return; }
             
-            int index = _ec.Entries.FindIndex(t => ib.Id == t.Key);
+            int index = EC.Entries.FindIndex(t => ib.Id == t.Key);
             _addIndex = index;
             _addLabel.Text = ib.Id;
-            _addValue.Text = _ec.Entries[index].Value;
+            _addValue.Text = EC.Entries[index].Value;
             
             ListActions la = Children.StartGroupAction();
             
@@ -156,7 +156,7 @@ namespace Encryption
             Button ib = sender as Button;
             if (ib == null) { return; }
             
-            Window.ClipBoard = _ec.Entries.Find(t => ib.Id == t.Key).Value;
+            Window.ClipBoard = EC.Entries.Find(t => ib.Id == t.Key).Value;
         }
         private void AddEntryEvent(object sender, EventArgs e)
         {
@@ -172,8 +172,8 @@ namespace Encryption
             _addValue.Text = "";
             
             _oldGroup = null;
-            _addIndex = _ec.Entries.Count;
-            _ec.Entries.Add(new KeyValuePair<string, string>());
+            _addIndex = EC.Entries.Count;
+            EC.Entries.Add(new KeyValuePair<string, string>());
             
             // la.Remove(_addEG);
             int end = Children.IndexOf(_addEG);
@@ -199,7 +199,7 @@ namespace Encryption
             key = key.Trim();
             if (key.Length == 0 || value.Length == 0) { return null; }
             
-            _ec.Entries[_addIndex] = new KeyValuePair<string, string>(key, value);
+            EC.Entries[_addIndex] = new KeyValuePair<string, string>(key, value);
             return CreateEntryGraphic(key);
         }
         private void CancelEvent(object sender, EventArgs e)

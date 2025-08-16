@@ -184,7 +184,7 @@ namespace Encryption
         private Button _addGroup;
         private TempTextBox _ttb;
         private ScaleLayout _scaleLayout = new ScaleLayout(5f);
-        private Layout _countainerL = new Layout(0f, 0f, 1.9f, 0f);
+        private Layout _countainerL = new Layout(0f, 0f, 2f, 0f);
         private void LoadPMElements(ListActions container)
         {
             container.Clear();
@@ -197,7 +197,7 @@ namespace Encryption
             
             if (Program.ReadOnly) { return; }
             
-            _addGroup = new Button(new TextLayout(5f, 5f, 0f, 0f, 1.9f, 0f, true))
+            _addGroup = new Button(new TextLayout(5f, 5f, 0f, 0f, 2f, 0f, true))
             {
                 TextSize = 30f,
                 Text = "Add Group",
@@ -240,6 +240,35 @@ namespace Encryption
             la.EndingFocus = ece;
             
             la.Apply();
+        }
+        
+        internal void SortAlphabetically(object sender, EventArgs e)
+        {
+            _lm.ViewContainer.Children.Sort((a, b) =>
+            {
+                if (a is Button) { return 1; }
+                if (b is Button) { return -1; }
+                
+                ECElement ece1 = a as ECElement;
+                ECElement ece2 = b as ECElement;
+                if (ece1 == null || ece2 == null) { return 0; }
+                
+                return ece1.EC.Name.CompareTo(ece2.EC.Name);
+            });
+        }
+        internal void SortTimeOrder(object sender, EventArgs e)
+        {
+            _lm.ViewContainer.Children.Sort((a, b) =>
+            {
+                if (a is Button) { return 1; }
+                if (b is Button) { return -1; }
+                
+                ECElement ece1 = a as ECElement;
+                ECElement ece2 = b as ECElement;
+                if (ece1 == null || ece2 == null) { return 0; }
+                
+                return ece1.EC.Order.CompareTo(ece2.EC.Order);
+            });
         }
     }
 }

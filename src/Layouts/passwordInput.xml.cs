@@ -16,14 +16,21 @@ namespace Encryption
         {
             IElement root = el.Source;
             
+            Label label1 = new Label();
+            label1.Layout = new TextLayout(5f, 5f, 0f, 64f, false);
+            label1.BorderWidth = 0f;
+            label1.TextSize = 12f;
+            label1.TextColour = ColourF.Grey;
+            el.Add(label1);
+            
             Container container1 = new Container();
             container1.Layout = new FixedLayout(0f, 0f, 200f, 100f);
-            Label label1 = new Label();
-            label1.Layout = new TextLayout(5f, 5f, 0f, 0.65f, true);
-            label1.BorderWidth = 0f;
-            label1.TextSize = 20f;
-            label1.Text = @"Enter Password";
-            container1.Children.Add(label1);
+            Label label2 = new Label();
+            label2.Layout = new TextLayout(5f, 5f, 0f, 0.65f, true);
+            label2.BorderWidth = 0f;
+            label2.TextSize = 20f;
+            label2.Text = @"Enter Password";
+            container1.Children.Add(label2);
             
             PasswordEnter passwordenter1 = new PasswordEnter();
             passwordenter1.Layout = new TextLayout(7f, 2f, 0f, 0f, 1.8f, 0f, true);
@@ -34,6 +41,7 @@ namespace Encryption
             
             container1.Colour = new ColourF(0.1f, 0.1f, 0.1f);
             el.Add(container1);
+            
         }
     }
 }

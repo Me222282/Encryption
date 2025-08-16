@@ -12,14 +12,36 @@ namespace Encryption
 {
     internal static class passwordManage
     {
-        internal static void LoadGUI(ElementList el)
+        internal static void LoadGUI(ElementList el, Program program)
         {
             IElement root = el.Source;
             
             Container container1 = new Container();
             container1.Layout = new Layout(0f, 0f, 2f, 2f);
-            container1.LayoutManager = new BlockLayout(5.0f);
+            container1.LayoutManager = new BlockLayout(5f);
+            Button button1 = new Button();
+            button1.Layout = new TextLayout(5f, 5f, 0f, 0f, 0.9f, 0f, true);
+            button1.BorderWidth = 0f;
+            button1.TextSize = 18f;
+            button1.Click += program.SortAlphabetically;
+            button1.Text = @"Alphabetical";
+            container1.Children.Add(button1);
+            
+            Button button2 = new Button();
+            button2.Layout = new TextLayout(5f, 5f, 0f, 0f, 0.9f, 0f, true);
+            button2.BorderWidth = 0f;
+            button2.TextSize = 18f;
+            button2.Click += program.SortTimeOrder;
+            button2.Text = @"Time Order";
+            container1.Children.Add(button2);
+            
+            Container container2 = new Container();
+            container2.Layout = new Layout(0f, 0f, 1.9f, 0f);
+            container2.LayoutManager = new ScaleLayout(0f, 5f);
+            container1.Children.Add(container2);
+            
             el.Add(container1);
+            
         }
     }
 }

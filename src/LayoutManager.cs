@@ -48,7 +48,7 @@ namespace Encryption
             xml.LoadGUI(_emptyLayout, File.ReadAllText(folder + "/Layouts/empty.xml"));
 #else
             passwordInput.LoadGUI(_inputLayout, p);
-            passwordManage.LoadGUI(_viewLayout);
+            passwordManage.LoadGUI(_viewLayout, p);
             empty.LoadGUI(_emptyLayout);
 #endif
         }
@@ -59,7 +59,7 @@ namespace Encryption
         private ElementManager _viewLayout;
         private ElementManager _emptyLayout;
         
-        public IElement ViewContainer => _viewLayout[0];
+        public IElement ViewContainer => _viewLayout[0].Children[2];
         public TextElement PathLabel => _inputLayout[0] as TextElement;
         
         public void SelectLayout(LayoutSelect layout)
