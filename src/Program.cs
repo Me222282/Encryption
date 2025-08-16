@@ -230,18 +230,20 @@ namespace Encryption
         }
         private void PushGroup(object sender, EventArgs e)
         {
+            string name = _ttb.Text?.Trim();
+            if (!_pm.CanAddGroup(name)) { return; }
+            
             ListActions la = _lm.ViewContainer.Children.StartGroupAction();
             
-            string name = _ttb.Text;
             la.Remove(_ttb);
-            if (name == null) { return; }
-            name = name.Trim();
-            if (name.Length == 0) { return; }
+            if (name != null && name.Length > 0)
+            {
+                ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
+                la.Add(ece);
+                la.EndingFocus = ece;
+            }
             
-            ECElement ece = new ECElement(_countainerL, _scaleLayout, _pm.AddGroup(name));
-            la.Add(ece);
             la.Add(_addGroup);
-            la.EndingFocus = ece;
             
             la.Apply();
         }

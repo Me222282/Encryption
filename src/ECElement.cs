@@ -183,6 +183,9 @@ namespace Encryption
         }
         private void ConfirmEvent(object sender, EventArgs e)
         {
+            string name = _addLabel.Text;
+            if (EC.Entries.Exists(k => k.Key == name)) { return; }
+            
             ListActions la = Children.StartGroupAction();
             IElement rep = ManageConfirm();
             la.Replace(_addGroup, rep);
