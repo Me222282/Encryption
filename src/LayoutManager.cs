@@ -9,7 +9,8 @@ namespace Encryption
     public enum LayoutSelect
     {
         Input,
-        View
+        View,
+        Empty
     }
     
     public class LayoutManager
@@ -35,26 +36,31 @@ namespace Encryption
         public LayoutManager(RootElement rootElement, Program p)
         {
             _root = rootElement;
-            // _xml = xml;
             
             _inputLayout = new ElementManager(_root);
             _viewLayout = new ElementManager(_root);
-            
+            _emptyLayout = new ElementManager(_root);
+#if DEBUG
+            Xml xml = new Xml();
             string folder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            
-            // _xml.LoadGUI(_inputLayout, File.ReadAllText(folder + "/Layouts/passwordInput.xml"));
-            // _xml.LoadGUI(_viewLayout, File.ReadAllText(folder + "/Layouts/passwordManage.xml"));
+            xml.LoadGUI(_inputLayout, File.ReadAllText(folder + "/Layouts/passwordInput.xml"));
+            xml.LoadGUI(_viewLayout, File.ReadAllText(folder + "/Layouts/passwordManage.xml"));
+            xml.LoadGUI(_emptyLayout, File.ReadAllText(folder + "/Layouts/empty.xml"));
+#else
             passwordInput.LoadGUI(_inputLayout, p);
             passwordManage.LoadGUI(_viewLayout);
+            empty.LoadGUI(_emptyLayout);
+#endif
         }
         
-        // private Xml _xml;
         private RootElement _root;
         
         private ElementManager _inputLayout;
         private ElementManager _viewLayout;
+        private ElementManager _emptyLayout;
         
         public IElement ViewContainer => _viewLayout[0];
+        public TextElement PathLabel => _inputLayout[0] as TextElement;
         
         public void SelectLayout(LayoutSelect layout)
         {
@@ -65,6 +71,7 @@ namespace Encryption
             {
                 LayoutSelect.Input => _inputLayout,
                 LayoutSelect.View => _viewLayout,
+                LayoutSelect.Empty => _emptyLayout,
                 _ => _viewLayout
             };
             

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<RootElement>
+    <Label Layout="TextLayout(5, 5, 0, 0, true)" BorderWidth="0">
+        <Property Name="TextSize" Value="20" />
+        Drop file to load or Ctrl + A to create new.
+    </Label>
+</RootElement>

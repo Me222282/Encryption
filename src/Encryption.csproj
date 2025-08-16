@@ -7,19 +7,27 @@
     <ProjectReference Include="..\deps\GUI\src\GUI.csproj" AdditionalProperties="UseDouble=false" />
   </ItemGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
   
-  <!-- <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <None Update="Layouts/passwordInput.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Layouts/passwordManage.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup> -->
+    <None Update="Layouts/empty.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

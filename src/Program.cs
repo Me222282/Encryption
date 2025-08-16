@@ -37,8 +37,7 @@ namespace Encryption
                     return;
                 }
                 
-                FileAccess fa = ReadOnly ? FileAccess.Read : FileAccess.ReadWrite;
-                w = new Program(800, 500, "AES Manager", new FileStream(path, FileMode.Open, fa));
+                w = new Program(800, 500, "AES Manager", path);
             }
             else
             {
@@ -51,13 +50,14 @@ namespace Encryption
             Core.Terminate();
         }
         
-        public Program(int width, int height, string title, Stream file)
+        public Program(int width, int height, string title, string path)
             : base(width, height, title)
         {
-            _file = file;
+            _file = new FileStream(path, FileMode.Open, ReadOnly ? FileAccess.Read : FileAccess.ReadWrite);
             _fileOpen = true;
             
             _lm = new LayoutManager(RootElement, this);
+            Actions.Push(() => _lm.PathLabel.Text = path);
             LoadLayout(LayoutSelect.Input);
         }
         
@@ -68,7 +68,7 @@ namespace Encryption
             _fileOpen = false;
             
             _lm = new LayoutManager(RootElement, this);
-            // LoadLayout(LayoutSelect.Input);
+            LoadLayout(LayoutSelect.Empty);
         }
         
         private bool _fileOpen;
@@ -105,6 +105,7 @@ namespace Encryption
                     Encryption.Encrypt(_pm, _key, _file);
                     _pm = null;
                 }
+                _lm.PathLabel.Text = "passwords.aes";
                 LoadLayout(LayoutSelect.Input);
                 if (_file != null) { _file.Close(); }
                 _file = new FileStream("passwords.aes", FileMode.Create);
@@ -145,6 +146,7 @@ namespace Encryption
                 Encryption.Encrypt(_pm, _key, _file);
                 _pm = null;
             }
+            _lm.PathLabel.Text = e.Paths[0];
             LoadLayout(LayoutSelect.Input);
             if (_file != null) { _file.Close(); }
             _file = new FileStream(e.Paths[0], FileMode.Open);
