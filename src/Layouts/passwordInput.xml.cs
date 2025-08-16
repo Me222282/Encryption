@@ -19,6 +19,7 @@ namespace Encryption
             Label label1 = new Label();
             label1.Layout = new TextLayout(5f, 5f, 0f, 64f, false);
             label1.BorderWidth = 0f;
+            label1.BorderColour = ColourF.Grey;
             label1.TextSize = 12f;
             label1.TextColour = ColourF.Grey;
             el.Add(label1);
@@ -41,6 +42,16 @@ namespace Encryption
             
             container1.Colour = new ColourF(0.1f, 0.1f, 0.1f);
             el.Add(container1);
+            
+            Label label3 = new Label();
+            label3.Layout = new TextLayout(5f, 5f, 0f, -64f, false);
+            label3.BorderWidth = 0f;
+            label3.BorderColour = ColourF.Red;
+            label3.TextSize = 12f;
+            label3.TextColour = ColourF.Red;
+            label3.Visable = false;
+            label3.Text = @"Failed to decrypt or load file.";
+            el.Add(label3);
             
         }
     }
