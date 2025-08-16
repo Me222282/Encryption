@@ -53,7 +53,7 @@ namespace Encryption
         public Program(int width, int height, string title, string path)
             : base(width, height, title)
         {
-            _file = new FileStream(path, FileMode.Open, ReadOnly ? FileAccess.Read : FileAccess.ReadWrite);
+            _path = path;
             _fileOpen = true;
             
             _lm = new LayoutManager(RootElement, this);
@@ -72,22 +72,31 @@ namespace Encryption
         }
         
         private bool _fileOpen;
-        private Stream _file;
+        private string _path;
         private PasswordManager _pm;
         private byte[] _key;
         
         private LayoutManager _lm;
         
         private void LoadLayout(LayoutSelect layout) => _lm.SelectLayout(layout);
-
+        
+        private void TrySave()
+        {
+            // cannot save
+            if (_pm == null || ReadOnly) { return; }
+            
+            FileStream stream = new FileStream(_path, FileMode.Truncate);
+            Encryption.Encrypt(_pm, _key, stream);
+            stream.Close();
+        }
+        
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
             
             if (e[Keys.S] && e[Mods.Control])
             {
-                if (_pm == null || ReadOnly) { return; }
-                Encryption.Encrypt(_pm, _key, _file);
+                TrySave();
                 return;
             }
             if (e[Keys.A] && e[Mods.Control])
@@ -99,17 +108,12 @@ namespace Encryption
             if (e[Keys.C] && e[Mods.Control] && e[Mods.Shift])
             {
                 if (ReadOnly) { return; }
-                //if (RootElement.Elements.Length > 0) { return; }
-                if (_pm != null)
-                {
-                    Encryption.Encrypt(_pm, _key, _file);
-                    _pm = null;
-                }
-                _lm.PathLabel.Text = "passwords.aes";
-                LoadLayout(LayoutSelect.Input);
-                if (_file != null) { _file.Close(); }
-                _file = new FileStream("passwords.aes", FileMode.Create);
+                TrySave();
+                _pm = null;
+                _path = "passwords.aes";
                 _fileOpen = false;
+                _lm.PathLabel.Text = _path;
+                LoadLayout(LayoutSelect.Input);
                 return;
             }
         }
@@ -117,13 +121,7 @@ namespace Encryption
         {
             base.OnStop(e);
             
-            if (_pm != null && !ReadOnly)
-            {
-                Encryption.Encrypt(_pm, _key, _file);
-            }
-            
-            if (_file == null) { return; }
-            _file.Close();
+            TrySave();
         }
         protected override void OnStart(EventArgs e)
         {
@@ -141,16 +139,12 @@ namespace Encryption
             base.OnFileDrop(e);
             
             //if (RootElement.Elements.Length > 0) { return; }
-            if (_pm != null && !Program.ReadOnly)
-            {
-                Encryption.Encrypt(_pm, _key, _file);
-                _pm = null;
-            }
+            TrySave();
+            _pm = null;
+            _path = e.Paths[0];
+            _fileOpen = true;
             _lm.PathLabel.Text = e.Paths[0];
             LoadLayout(LayoutSelect.Input);
-            if (_file != null) { _file.Close(); }
-            _file = new FileStream(e.Paths[0], FileMode.Open);
-            _fileOpen = true;
         }
 
         internal void OnPasswordEntered(object sender, EventArgs e)
@@ -162,7 +156,9 @@ namespace Encryption
             
             if (_fileOpen)
             {
-                _pm = Encryption.Decrypt(_file, password);
+                FileStream stream = new FileStream(_path, FileMode.Open, ReadOnly ? FileAccess.Read : FileAccess.ReadWrite);
+                _pm = Encryption.Decrypt(stream, password);
+                stream.Close();
                 if (_pm == null)
                 {
                     _lm.ShowError();
@@ -179,9 +175,6 @@ namespace Encryption
             ListActions la = _lm.ViewContainer.Children.StartGroupAction();
             LoadPMElements(la);
             la.Apply();
-            // reset to origin
-            _lm.ViewContainer.Properties.SetYScroll(0f);
-            _lm.ViewContainer.Properties.SetXScroll(0f);
             LoadLayout(LayoutSelect.View);
         }
         
@@ -275,6 +268,12 @@ namespace Encryption
                 
                 return ece1.EC.Order.CompareTo(ece2.EC.Order);
             });
+        }
+        
+        public void RemoveGroup(ECElement group)
+        {
+            group.Parent.Children.Remove(group);
+            _pm.RemoveGroup(group.EC);
         }
     }
 }

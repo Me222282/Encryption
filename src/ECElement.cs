@@ -74,7 +74,7 @@ namespace Encryption
         private Container _addGroup;
         private TextInput _addLabel;
         private TextInput _addValue;
-        private int _addIndex;
+        private int _addIndex = -1;
         private IElement _oldGroup;
         
         private Container CreateEntryGraphic(string name)
@@ -124,7 +124,13 @@ namespace Encryption
             Button ib = sender as Button;
             if (ib == null) { return; }
             
-            EC.Entries.RemoveAll(t => ib.Id == t.Key);
+            // EC.Entries.RemoveAll(t => ib.Id == t.Key);
+            int index = EC.Entries.FindIndex(t => ib.Id == t.Key);
+            // should not occur
+            if (_addIndex == index) { return; }
+            // adjust addIndex for removed entry
+            if (_addIndex > index) { _addIndex--; }
+            EC.Entries.RemoveAt(index);
             RemoveChild(ib.Parent);
         }
         private void EditEvent(object sender, EventArgs e)
@@ -189,6 +195,7 @@ namespace Encryption
             ListActions la = Children.StartGroupAction();
             IElement rep = ManageConfirm();
             la.Replace(_addGroup, rep);
+            _addIndex = -1;
             _oldGroup = null;
             // la.Add(_addEG);
             la.EndingFocus = _addEG;
@@ -209,6 +216,7 @@ namespace Encryption
         {
             ListActions la = Children.StartGroupAction();
             la.Replace(_addGroup, _oldGroup);
+            _addIndex = -1;
             _oldGroup = null;
             // la.Add(_addEG);
             la.EndingFocus = _addEG;
@@ -216,7 +224,9 @@ namespace Encryption
         }
         private void DeleteGroup(object sender, EventArgs e)
         {
-            Parent.Children.Remove(this);
+            // Parent.Children.Remove(this);
+            // removes entry from pm as well
+            (Window as Program)?.RemoveGroup(this);
         }
     }
 }

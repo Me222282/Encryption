@@ -85,8 +85,8 @@ namespace Encryption
             _groups.Add(ec);
             return ec;
         }
-        public bool CanAddGroup(string name) => _groups.Exists(g => g.Name == name);
-        public void RemoveGroup(string name) => _groups.RemoveAll(ec => ec.Name == name);
+        public bool CanAddGroup(string name) => !_groups.Exists(g => g.Name == name);
+        public void RemoveGroup(EntryContainer group) => _groups.Remove(group);
         
         public IEnumerator<EntryContainer> GetEnumerator() => _groups.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => _groups.GetEnumerator();

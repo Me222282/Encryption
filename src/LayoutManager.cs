@@ -83,6 +83,10 @@ namespace Encryption
             // }
             
             _errorLabel.Properties.Visable = false;
+            // reset to origin
+            IElement scollBox = _viewLayout[0];
+            scollBox.Properties.SetYScroll(0f);
+            scollBox.Properties.SetXScroll(0f);
             
             for (int i = 0; i < select.Length; i++)
             {
