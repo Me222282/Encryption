@@ -12,6 +12,16 @@ namespace Encryption
         public int Order { get; set; }
         public string Name { get; set; }
         public List<KeyValuePair<string, string>> Entries { get; } = new List<KeyValuePair<string, string>>();
+        
+        public bool Exists(string name, int ignore)
+        {
+            for (int i = 0; i < Entries.Count; i++)
+            {
+                if (i == ignore || Entries[i].Key != name) { continue; }
+                return true;
+            }
+            return false;
+        }
     }
     
     public class PasswordManager : IEnumerable<EntryContainer>

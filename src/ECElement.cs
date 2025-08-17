@@ -198,7 +198,8 @@ namespace Encryption
         private void ConfirmEvent(object sender, EventArgs e)
         {
             string name = _addLabel.Text;
-            if (EC.Entries.Exists(k => k.Key == name)) { return; }
+            // make sure we cannot add duplicate entries
+            if (EC.Exists(name, _addIndex)) { return; }
             
             ListActions la = Children.StartGroupAction();
             IElement rep = ManageConfirm();
