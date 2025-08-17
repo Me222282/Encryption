@@ -93,6 +93,11 @@ namespace Encryption
                 la.Add(select[i]);
             }
             
+            if (layout == LayoutSelect.Input)
+            {
+                la.EndingFocus = _inputLayout[1].Children[1];
+            }
+            
             la.Apply();
         }
         

@@ -53,27 +53,27 @@ namespace Encryption
         public override bool ChildDependent => true;
 
         public ScaleLayout2(Vector4 margin)
-            : base(true, false)
+            : base(true, true)
         {
             _margin = margin;
         }
         public ScaleLayout2(Vector2 margin)
-            : base(true, false)
+            : base(true, true)
         {
             _margin = (margin, margin);
         }
         public ScaleLayout2(float margin)
-            : base(true, false)
+            : base(true, true)
         {
             _margin = (margin, margin, margin, margin);
         }
         public ScaleLayout2(float marginX, float marginY)
-            : base(true, false)
+            : base(true, true)
         {
             _margin = (marginX, marginY, marginX, marginY);
         }
         public ScaleLayout2(float left, float right, float top, float bottom)
-            : base(true, false)
+            : base(true, true)
         {
             _margin = (left, top, right, bottom);
         }

@@ -103,6 +103,9 @@ namespace Encryption
                 jw.WriteNumber(OrderLabel, ec.Order);
                 foreach (KeyValuePair<string, string> keyPair in ec.Entries)
                 {
+                    // in middle of entering new value
+                    if (keyPair.Key == null) { continue; }
+                    
                     jw.WriteString(keyPair.Key, keyPair.Value);
                 }
                 jw.WriteEndObject();

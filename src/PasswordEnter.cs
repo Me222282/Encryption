@@ -1,7 +1,4 @@
 using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using Zene.GUI;
 using Zene.Windowing;
 
@@ -25,8 +22,7 @@ namespace Encryption
         protected override void OnTextInput(TextInputEventArgs e)
         {
             base.OnTextInput(e);
-            
-            _passWordView = new string('*', base.TextReference.Length);
+            UpdateView();
         }
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -37,12 +33,14 @@ namespace Encryption
             }
             
             base.OnKeyDown(e);
+            UpdateView();
+        }
+        private void UpdateView()
+        {
+            if (base.TextReference.Length == _passWordView.Length) { return; }
             
-            if (e[Keys.BackSpace] || e[Keys.Delete])
-            {
-                _passWordView = new string('*', base.TextReference.Length);
-                return;
-            }
+            _passWordView = new string('*', base.TextReference.Length);
+            TriggerChange();
         }
     }
 }

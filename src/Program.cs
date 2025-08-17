@@ -84,9 +84,17 @@ namespace Encryption
             // cannot save
             if (_pm == null || ReadOnly) { return; }
             
-            FileStream stream = new FileStream(_path, FileMode.Truncate);
-            Encryption.Encrypt(_pm, _key, stream);
-            stream.Close();
+            try
+            {
+                FileStream stream = new FileStream(_path, FileMode.Truncate);
+                Encryption.Encrypt(_pm, _key, stream);
+                stream.Close();
+            }
+            catch (Exception)
+            {
+                // error when saving
+                // TODO: show some message
+            }
         }
         
         protected override void OnKeyDown(KeyEventArgs e)
@@ -155,7 +163,17 @@ namespace Encryption
             
             if (_fileOpen)
             {
-                FileStream stream = new FileStream(_path, FileMode.Open, ReadOnly ? FileAccess.Read : FileAccess.ReadWrite);
+                FileStream stream;
+                try
+                {
+                    stream = new FileStream(_path, FileMode.Open, ReadOnly ? FileAccess.Read : FileAccess.ReadWrite);
+                }
+                catch (Exception)
+                {
+                    // error when loading
+                    _lm.ShowError();
+                    return;
+                }
                 _pm = Encryption.Decrypt(stream, password);
                 stream.Close();
                 if (_pm == null)
