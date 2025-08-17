@@ -16,7 +16,14 @@ namespace Encryption
             Graphics.Colour = ColourF.Grey;
             
             // label
-            AddChild(new CopyTextInput(_tl2, s => ec.Name = s) { Text = ec.Name, TextSize = 20f, BorderWidth = 0f });
+            if (Program.ReadOnly)
+            {
+                AddChild(new Label(_tl2) { Text = ec.Name, TextSize = 20f, BorderWidth = 0f });
+            }
+            else
+            {
+                AddChild(new CopyTextInput(_tl2, s => ec.Name = s) { Text = ec.Name, TextSize = 20f, BorderWidth = 0f });
+            }
             
             Span<KeyValuePair<string, string>> span = CollectionsMarshal.AsSpan(ec.Entries);
             for (int i = 0; i < span.Length; i++)
